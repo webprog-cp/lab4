@@ -1,0 +1,575 @@
+openapi: 3.0.0
+info:
+  contact: {}
+  description: REST API service for cats shelter management.
+  title: Cats shelter management API
+  version: "1.0"
+paths:
+  /cats:
+    delete:
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Delete all cats
+      tags:
+        - cats
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/dto.CatResponse"
+                type: array
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      summary: Get all cats
+      tags:
+        - cats
+    post:
+      requestBody:
+        $ref: "#/components/requestBodies/dto.CatRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.CatResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Create cat
+      tags:
+        - cats
+  "/cats/{id}":
+    delete:
+      parameters:
+        - description: Cat ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Delete cat
+      tags:
+        - cats
+    get:
+      parameters:
+        - description: Cat ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.CatResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      summary: Get cat by ID
+      tags:
+        - cats
+    put:
+      parameters:
+        - description: Cat ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/dto.CatRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.CatResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Update cat
+      tags:
+        - cats
+  /shelters:
+    delete:
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Delete all shelters
+      tags:
+        - shelters
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/dto.ShelterResponse"
+                type: array
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      summary: Get all shelters
+      tags:
+        - shelters
+    post:
+      requestBody:
+        $ref: "#/components/requestBodies/dto.ShelterRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ShelterResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Create shelter
+      tags:
+        - shelters
+  "/shelters/{id}":
+    delete:
+      parameters:
+        - description: Shelter ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Delete shelter
+      tags:
+        - shelters
+    get:
+      parameters:
+        - description: Shelter ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ShelterResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      summary: Get shelter by ID
+      tags:
+        - shelters
+    put:
+      parameters:
+        - description: Shelter ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/dto.ShelterRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ShelterResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      security:
+        - ApiKeyAuth: []
+      summary: Update shelter
+      tags:
+        - shelters
+  "/shelters/{id}/cats":
+    get:
+      parameters:
+        - description: Shelter ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/dto.CatResponse"
+                type: array
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/dto.ErrorResponse"
+      summary: Get shelter cats
+      tags:
+        - shelters
+servers:
+  - url: //localhost:8080/api/v1
+components:
+  requestBodies:
+    dto.CatRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/dto.CatRequest"
+      description: Cat
+      required: true
+    dto.ShelterRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/dto.ShelterRequest"
+      description: Shelter
+      required: true
+  securitySchemes:
+    ApiKeyAuth:
+      in: header
+      name: X-API-Key
+      type: apiKey
+  schemas:
+    dto.CatRequest:
+      properties:
+        adopted:
+          type: boolean
+        ageMonths:
+          maximum: 360
+          type: integer
+        gender:
+          enum:
+            - male
+            - female
+          type: string
+        name:
+          maxLength: 100
+          minLength: 1
+          type: string
+        shelterID:
+          minimum: 1
+          type: integer
+      required:
+        - ageMonths
+        - gender
+        - name
+        - shelterID
+      type: object
+    dto.CatResponse:
+      properties:
+        adopted:
+          type: boolean
+        ageMonths:
+          type: integer
+        gender:
+          type: string
+        id:
+          type: integer
+        name:
+          type: string
+        shelterID:
+          type: integer
+      type: object
+    dto.ErrorResponse:
+      properties:
+        error:
+          type: string
+      type: object
+    dto.ShelterRequest:
+      properties:
+        address:
+          maxLength: 200
+          minLength: 1
+          type: string
+        capacity:
+          minimum: 1
+          type: integer
+        city:
+          maxLength: 100
+          minLength: 1
+          type: string
+        name:
+          maxLength: 100
+          minLength: 1
+          type: string
+      required:
+        - address
+        - capacity
+        - city
+        - name
+      type: object
+    dto.ShelterResponse:
+      properties:
+        address:
+          type: string
+        capacity:
+          type: integer
+        city:
+          type: string
+        id:
+          type: integer
+        name:
+          type: string
+      type: object
