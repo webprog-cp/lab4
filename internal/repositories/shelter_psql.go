@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -19,18 +20,18 @@ func NewShelterRepoPsql(db *gorm.DB) *ShelterRepoPsql {
 	return &ShelterRepoPsql{db: db}
 }
 
-func (sr *ShelterRepoPsql) GetAll() ([]models.Shelter, error) {
+func (sr *ShelterRepoPsql) GetAll(ctx context.Context) ([]models.Shelter, error) {
 	var shelters []models.Shelter
-	if err := sr.db.Order("id").Find(&shelters).Error; err != nil {
+	if err := sr.db.WithContext(ctx).Order("id").Find(&shelters).Error; err != nil {
 		return nil, fmt.Errorf("get all shelters: %w", err)
 	}
 
 	return shelters, nil
 }
 
-func (sr *ShelterRepoPsql) GetByID(id uint64) (models.Shelter, error) {
+func (sr *ShelterRepoPsql) GetByID(ctx context.Context, id uint64) (models.Shelter, error) {
 	var shelter models.Shelter
-	if err := sr.db.First(&shelter, id).Error; err != nil {
+	if err := sr.db.WithContext(ctx).First(&shelter, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.Shelter{}, fmt.Errorf("shelter %d: %w", id, const_errors.NoEntityByID)
 		}
@@ -40,16 +41,16 @@ func (sr *ShelterRepoPsql) GetByID(id uint64) (models.Shelter, error) {
 	return shelter, nil
 }
 
-func (sr *ShelterRepoPsql) Create(shelter models.Shelter) (models.Shelter, error) {
-	if err := sr.db.Create(&shelter).Error; err != nil {
+func (sr *ShelterRepoPsql) Create(ctx context.Context, shelter models.Shelter) (models.Shelter, error) {
+	if err := sr.db.WithContext(ctx).Create(&shelter).Error; err != nil {
 		return models.Shelter{}, fmt.Errorf("create shelter: %w", err)
 	}
 
 	return shelter, nil
 }
 
-func (sr *ShelterRepoPsql) Update(id uint64, shelter models.Shelter) error {
-	err := sr.db.Transaction(func(tx *gorm.DB) error {
+func (sr *ShelterRepoPsql) Update(ctx context.Context, id uint64, shelter models.Shelter) error {
+	err := sr.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var existing models.Shelter
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&existing, id).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -80,10 +81,15 @@ func (sr *ShelterRepoPsql) Update(id uint64, shelter models.Shelter) error {
 	return nil
 }
 
-func (sr *ShelterRepoPsql) Delete(id uint64) error {
-	result := sr.db.Delete(&models.Shelter{}, id)
+func hasDependents(err error) bool {
+	var pg interface{ SQLState() string }
+	return errors.Is(err, gorm.ErrForeignKeyViolated) || errors.As(err, &pg) && pg.SQLState() == "23001"
+}
+
+func (sr *ShelterRepoPsql) Delete(ctx context.Context, id uint64) error {
+	result := sr.db.WithContext(ctx).Delete(&models.Shelter{}, id)
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrForeignKeyViolated) {
+		if hasDependents(result.Error) {
 			return fmt.Errorf("shelter %d: %w", id, const_errors.EntityHasDependents)
 		}
 		return fmt.Errorf("delete shelter %d: %w", id, result.Error)
@@ -95,9 +101,9 @@ func (sr *ShelterRepoPsql) Delete(id uint64) error {
 	return nil
 }
 
-func (sr *ShelterRepoPsql) DeleteAll() error {
-	if err := sr.db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.Shelter{}).Error; err != nil {
-		if errors.Is(err, gorm.ErrForeignKeyViolated) {
+func (sr *ShelterRepoPsql) DeleteAll(ctx context.Context) error {
+	if err := sr.db.WithContext(ctx).Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.Shelter{}).Error; err != nil {
+		if hasDependents(err) {
 			return fmt.Errorf("delete all shelters: %w", const_errors.EntityHasDependents)
 		}
 		return fmt.Errorf("delete all shelters: %w", err)

@@ -1,13 +1,17 @@
 package repositories
 
-import "cp_lab1/internal/models"
+import (
+	"context"
+
+	"cp_lab1/internal/models"
+)
 
 type CatRepo interface {
-	GetAll() ([]models.Cat, error)
-	GetByID(uint64) (models.Cat, error)
-	GetCatsByShelterID(uint64) ([]models.Cat, error)
-	Create(models.Cat) (models.Cat, error)
-	Update(uint64, models.Cat) error
-	Delete(uint64) error
-	DeleteAll() error
+	GetAll(context.Context) ([]models.Cat, error)
+	GetByID(context.Context, uint64) (models.Cat, error)
+	GetCatsByShelterID(context.Context, uint64) ([]models.Cat, error)
+	Create(context.Context, models.Cat) (models.Cat, error)
+	Update(context.Context, uint64, models.Cat) error
+	Delete(context.Context, uint64) error
+	DeleteAll(context.Context) error
 }

@@ -7,3 +7,8 @@
 !internal/**
 !docs/
 !docs/**
+!config.json
+!web/
+!web/index.html
+!web/assets/
+!web/assets/**

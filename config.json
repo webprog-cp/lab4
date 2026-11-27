@@ -1,0 +1,12 @@
+{
+  "host": "0.0.0.0",
+  "port": "8080",
+  "ginMode": "debug",
+  "apiPrefix": "/api",
+  "apiVersion": "v1",
+  "apiKey": "demo",
+  "readOnly": false,
+  "maxListSize": 100,
+  "cacheTTLSeconds": 300,
+  "logLevel": "info"
+}

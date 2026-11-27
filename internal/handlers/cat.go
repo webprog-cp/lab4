@@ -1,30 +1,36 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
+	"cp_lab1/internal/cache"
 	"cp_lab1/internal/const_errors"
 	"cp_lab1/internal/dto"
 	"cp_lab1/internal/mapper"
+	"cp_lab1/internal/models"
 	"cp_lab1/internal/repositories"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CatHandler struct {
+	opts        Options
+	cache       cache.Cache
 	repo        repositories.CatRepo
 	shelterRepo repositories.ShelterRepo
 }
 
-func NewCatHandler(repo repositories.CatRepo, shelterRepo repositories.ShelterRepo) *CatHandler {
+func NewCatHandler(repo repositories.CatRepo, shelterRepo repositories.ShelterRepo, cache cache.Cache, opts Options) *CatHandler {
 	return &CatHandler{
+		opts:        opts,
+		cache:       cache,
 		repo:        repo,
 		shelterRepo: shelterRepo,
 	}
 }
 
-// GetAll godoc
 // @Summary Get all cats
 // @Tags cats
 // @Produce json
@@ -32,16 +38,15 @@ func NewCatHandler(repo repositories.CatRepo, shelterRepo repositories.ShelterRe
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /cats [get]
 func (ch *CatHandler) GetAll(c *gin.Context) {
-	cats, err := ch.repo.GetAll()
+	cats, err := ch.repo.GetAll(c.Request.Context())
 	if err != nil {
 		respondRepositoryError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, mapper.CatResponses(cats))
+	c.JSON(http.StatusOK, mapper.CatResponses(limitList(c, ch.opts, cats)))
 }
 
-// GetByID godoc
 // @Summary Get cat by ID
 // @Tags cats
 // @Produce json
@@ -57,16 +62,25 @@ func (ch *CatHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	cat, err := ch.repo.GetByID(id)
+	key := cacheKey(id)
+	var cat models.Cat
+
+	if cacheGet(c, ch.cache, ch.opts, key, &cat) {
+		c.JSON(http.StatusOK, mapper.CatResponse(cat))
+		return
+	}
+
+	cat, err := ch.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
 		respondRepositoryError(c, err)
 		return
 	}
 
+	cacheSet(c, ch.cache, ch.opts, key, cat)
+
 	c.JSON(http.StatusOK, mapper.CatResponse(cat))
 }
 
-// Create godoc
 // @Summary Create cat
 // @Tags cats
 // @Accept json
@@ -82,16 +96,16 @@ func (ch *CatHandler) GetByID(c *gin.Context) {
 func (ch *CatHandler) Create(c *gin.Context) {
 	var request dto.CatRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid request body"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: bindErrorMessage(err, &request)})
 		return
 	}
 
-	if err := ch.shelterHasCapacity(request.ShelterID); err != nil {
+	if err := ch.shelterHasCapacity(c.Request.Context(), request.ShelterID); err != nil {
 		respondRepositoryError(c, err)
 		return
 	}
 
-	cat, err := ch.repo.Create(mapper.CatFromRequest(request))
+	cat, err := ch.repo.Create(c.Request.Context(), mapper.CatFromRequest(request))
 	if err != nil {
 		respondRepositoryError(c, err)
 		return
@@ -100,7 +114,6 @@ func (ch *CatHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, mapper.CatResponse(cat))
 }
 
-// Update godoc
 // @Summary Update cat
 // @Tags cats
 // @Accept json
@@ -123,34 +136,41 @@ func (ch *CatHandler) Update(c *gin.Context) {
 
 	var request dto.CatRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid request body"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: bindErrorMessage(err, &request)})
 		return
 	}
 
-	existing, err := ch.repo.GetByID(id)
+	existing, err := ch.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
 		respondRepositoryError(c, err)
 		return
 	}
 	if existing.ShelterID != request.ShelterID {
-		if err := ch.shelterHasCapacity(request.ShelterID); err != nil {
+		if err := ch.shelterHasCapacity(c.Request.Context(), request.ShelterID); err != nil {
 			respondRepositoryError(c, err)
 			return
 		}
 	}
 
 	cat := mapper.CatFromRequest(request)
-	if err := ch.repo.Update(id, cat); err != nil {
+	if err := ch.repo.Update(c.Request.Context(), id, cat); err != nil {
 		respondRepositoryError(c, err)
 		return
 	}
 
 	cat.ID = id
+	key := cacheKey(id)
+	ctx, cancel := cacheContext(c)
+	if err := ch.cache.Invalidate(ctx, key); err != nil {
+		logCacheError(c, "invalidate", key, err)
+	}
+	cancel()
+
 	c.JSON(http.StatusOK, mapper.CatResponse(cat))
 }
 
-func (ch *CatHandler) shelterHasCapacity(shelterID uint64) error {
-	shelter, err := ch.shelterRepo.GetByID(shelterID)
+func (ch *CatHandler) shelterHasCapacity(ctx context.Context, shelterID uint64) error {
+	shelter, err := ch.shelterRepo.GetByID(ctx, shelterID)
 	if errors.Is(err, const_errors.NoEntityByID) {
 		return const_errors.InvalidReference
 	}
@@ -158,7 +178,7 @@ func (ch *CatHandler) shelterHasCapacity(shelterID uint64) error {
 		return err
 	}
 
-	cats, err := ch.repo.GetCatsByShelterID(shelterID)
+	cats, err := ch.repo.GetCatsByShelterID(ctx, shelterID)
 	if err != nil {
 		return err
 	}
@@ -169,7 +189,6 @@ func (ch *CatHandler) shelterHasCapacity(shelterID uint64) error {
 	return nil
 }
 
-// Delete godoc
 // @Summary Delete cat
 // @Tags cats
 // @Security ApiKeyAuth
@@ -186,15 +205,21 @@ func (ch *CatHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := ch.repo.Delete(id); err != nil {
+	if err := ch.repo.Delete(c.Request.Context(), id); err != nil {
 		respondRepositoryError(c, err)
 		return
 	}
 
+	key := cacheKey(id)
+	ctx, cancel := cacheContext(c)
+	if err := ch.cache.Invalidate(ctx, key); err != nil {
+		logCacheError(c, "invalidate", key, err)
+	}
+	cancel()
+
 	c.Status(http.StatusNoContent)
 }
 
-// DeleteAll godoc
 // @Summary Delete all cats
 // @Tags cats
 // @Security ApiKeyAuth
@@ -203,10 +228,16 @@ func (ch *CatHandler) Delete(c *gin.Context) {
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /cats [delete]
 func (ch *CatHandler) DeleteAll(c *gin.Context) {
-	if err := ch.repo.DeleteAll(); err != nil {
+	if err := ch.repo.DeleteAll(c.Request.Context()); err != nil {
 		respondRepositoryError(c, err)
 		return
 	}
+
+	ctx, cancel := cacheContext(c)
+	if err := ch.cache.InvalidateAll(ctx); err != nil {
+		logCacheError(c, "invalidate all", "*", err)
+	}
+	cancel()
 
 	c.Status(http.StatusNoContent)
 }

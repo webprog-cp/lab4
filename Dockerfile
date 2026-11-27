@@ -17,6 +17,9 @@ FROM scratch
 WORKDIR /app
 COPY --from=build /out/api /app/api
 COPY --from=build /src/docs/openapi.yaml /app/docs/openapi.yaml
+COPY config.json /app/config.json
+COPY web/index.html /app/web/index.html
+COPY web/assets/ /app/web/assets/
 USER 65532:65532
 EXPOSE 8080
 ENTRYPOINT ["/app/api"]

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -21,18 +22,18 @@ func NewCatRepoPsql(db *gorm.DB) *CatRepoPsql {
 	}
 }
 
-func (cr *CatRepoPsql) GetAll() ([]models.Cat, error) {
+func (cr *CatRepoPsql) GetAll(ctx context.Context) ([]models.Cat, error) {
 	var cats []models.Cat
-	if err := cr.db.Order("id").Find(&cats).Error; err != nil {
+	if err := cr.db.WithContext(ctx).Order("id").Find(&cats).Error; err != nil {
 		return nil, fmt.Errorf("get all cats: %w", err)
 	}
 
 	return cats, nil
 }
 
-func (cr *CatRepoPsql) GetByID(id uint64) (models.Cat, error) {
+func (cr *CatRepoPsql) GetByID(ctx context.Context, id uint64) (models.Cat, error) {
 	var cat models.Cat
-	if err := cr.db.First(&cat, id).Error; err != nil {
+	if err := cr.db.WithContext(ctx).First(&cat, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.Cat{}, fmt.Errorf("cat %d: %w", id, const_errors.NoEntityByID)
 		}
@@ -42,9 +43,9 @@ func (cr *CatRepoPsql) GetByID(id uint64) (models.Cat, error) {
 	return cat, nil
 }
 
-func (cr *CatRepoPsql) GetCatsByShelterID(shelterID uint64) ([]models.Cat, error) {
+func (cr *CatRepoPsql) GetCatsByShelterID(ctx context.Context, shelterID uint64) ([]models.Cat, error) {
 	var cats []models.Cat
-	if err := cr.db.Where("shelter_id = ?", shelterID).Order("id").Find(&cats).Error; err != nil {
+	if err := cr.db.WithContext(ctx).Where("shelter_id = ?", shelterID).Order("id").Find(&cats).Error; err != nil {
 		return nil, fmt.Errorf("get cats for shelter %d: %w", shelterID, err)
 	}
 
@@ -71,8 +72,8 @@ func shelterHasCapacity(tx *gorm.DB, shelterID uint64) error {
 	return nil
 }
 
-func (cr *CatRepoPsql) Create(cat models.Cat) (models.Cat, error) {
-	err := cr.db.Transaction(func(tx *gorm.DB) error {
+func (cr *CatRepoPsql) Create(ctx context.Context, cat models.Cat) (models.Cat, error) {
+	err := cr.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := shelterHasCapacity(tx, cat.ShelterID); err != nil {
 			return err
 		}
@@ -85,8 +86,8 @@ func (cr *CatRepoPsql) Create(cat models.Cat) (models.Cat, error) {
 	return cat, nil
 }
 
-func (cr *CatRepoPsql) Update(id uint64, cat models.Cat) error {
-	err := cr.db.Transaction(func(tx *gorm.DB) error {
+func (cr *CatRepoPsql) Update(ctx context.Context, id uint64, cat models.Cat) error {
+	err := cr.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var existing models.Cat
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&existing, id).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -116,8 +117,8 @@ func (cr *CatRepoPsql) Update(id uint64, cat models.Cat) error {
 	return nil
 }
 
-func (cr *CatRepoPsql) Delete(id uint64) error {
-	result := cr.db.Delete(&models.Cat{}, id)
+func (cr *CatRepoPsql) Delete(ctx context.Context, id uint64) error {
+	result := cr.db.WithContext(ctx).Delete(&models.Cat{}, id)
 	if result.Error != nil {
 		return fmt.Errorf("delete cat %d: %w", id, result.Error)
 	}
@@ -128,8 +129,8 @@ func (cr *CatRepoPsql) Delete(id uint64) error {
 	return nil
 }
 
-func (cr *CatRepoPsql) DeleteAll() error {
-	if err := cr.db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.Cat{}).Error; err != nil {
+func (cr *CatRepoPsql) DeleteAll(ctx context.Context) error {
+	if err := cr.db.WithContext(ctx).Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.Cat{}).Error; err != nil {
 		return fmt.Errorf("delete all cats: %w", err)
 	}
 

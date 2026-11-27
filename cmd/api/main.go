@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"log/slog"
+	"os"
 
 	"cp_lab1/internal/app"
 	"cp_lab1/internal/config"
@@ -19,8 +21,15 @@ import (
 // @in header
 // @name X-API-Key
 func main() {
-	cfg := config.Load()
-	a, err := app.New(cfg)
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: cfg.SlogLevel()}))
+	logger.Info("config loaded", "readOnly", cfg.ReadOnly, "maxListSize", cfg.MaxListSize, "cacheTTL", cfg.CacheTTL())
+
+	a, err := app.New(cfg, logger)
 	if err != nil {
 		log.Fatal(err)
 	}

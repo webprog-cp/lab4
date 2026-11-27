@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -16,7 +17,7 @@ import (
 func TestShelterHandlerReturnsErrorResponse(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	h := NewShelterHandler(repositories.NewShelterRepoMemory(), repositories.NewCatRepoMemory())
+	h := NewShelterHandler(repositories.NewShelterRepoMemory(), repositories.NewCatRepoMemory(), mockCache{}, testOpts)
 	r.GET("/shelters/:id", h.GetByID)
 
 	w := httptest.NewRecorder()
@@ -40,17 +41,17 @@ func TestShelterUpdateRejectsCapacityBelowOccupancy(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	shelterRepo := repositories.NewShelterRepoMemory()
 	catRepo := repositories.NewCatRepoMemory()
-	if _, err := shelterRepo.Create(models.Shelter{Name: "Test", Capacity: 2}); err != nil {
+	if _, err := shelterRepo.Create(context.Background(), models.Shelter{Name: "Test", Capacity: 2}); err != nil {
 		t.Fatal(err)
 	}
 	for i := 0; i < 2; i++ {
-		if _, err := catRepo.Create(models.Cat{Name: "Cat", ShelterID: 1}); err != nil {
+		if _, err := catRepo.Create(context.Background(), models.Cat{Name: "Cat", ShelterID: 1}); err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	r := gin.New()
-	h := NewShelterHandler(shelterRepo, catRepo)
+	h := NewShelterHandler(shelterRepo, catRepo, mockCache{}, testOpts)
 	r.PUT("/shelters/:id", h.Update)
 	body := `{"name":"Test","city":"Kyiv","address":"Street","capacity":1}`
 	w := httptest.NewRecorder()
@@ -61,7 +62,7 @@ func TestShelterUpdateRejectsCapacityBelowOccupancy(t *testing.T) {
 	if w.Code != http.StatusConflict {
 		t.Fatalf("status = %d, want %d; body = %s", w.Code, http.StatusConflict, w.Body.String())
 	}
-	shelter, err := shelterRepo.GetByID(1)
+	shelter, err := shelterRepo.GetByID(context.Background(), 1)
 	if err != nil {
 		t.Fatal(err)
 	}

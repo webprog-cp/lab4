@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -21,7 +22,7 @@ func NewShelterRepoMemory() *ShelterRepoMemo {
 	}
 }
 
-func (sr *ShelterRepoMemo) GetAll() ([]models.Shelter, error) {
+func (sr *ShelterRepoMemo) GetAll(_ context.Context) ([]models.Shelter, error) {
 	sr.mu.RLock()
 	defer sr.mu.RUnlock()
 
@@ -34,7 +35,7 @@ func (sr *ShelterRepoMemo) GetAll() ([]models.Shelter, error) {
 	return shelters, nil
 }
 
-func (sr *ShelterRepoMemo) GetByID(id uint64) (models.Shelter, error) {
+func (sr *ShelterRepoMemo) GetByID(_ context.Context, id uint64) (models.Shelter, error) {
 	sr.mu.RLock()
 	defer sr.mu.RUnlock()
 
@@ -46,7 +47,7 @@ func (sr *ShelterRepoMemo) GetByID(id uint64) (models.Shelter, error) {
 	return shelter, nil
 }
 
-func (sr *ShelterRepoMemo) Create(shelter models.Shelter) (models.Shelter, error) {
+func (sr *ShelterRepoMemo) Create(_ context.Context, shelter models.Shelter) (models.Shelter, error) {
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
 
@@ -58,7 +59,7 @@ func (sr *ShelterRepoMemo) Create(shelter models.Shelter) (models.Shelter, error
 	return shelter, nil
 }
 
-func (sr *ShelterRepoMemo) Update(id uint64, shelter models.Shelter) error {
+func (sr *ShelterRepoMemo) Update(_ context.Context, id uint64, shelter models.Shelter) error {
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
 
@@ -72,7 +73,7 @@ func (sr *ShelterRepoMemo) Update(id uint64, shelter models.Shelter) error {
 	return nil
 }
 
-func (sr *ShelterRepoMemo) Delete(id uint64) error {
+func (sr *ShelterRepoMemo) Delete(_ context.Context, id uint64) error {
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
 
@@ -85,7 +86,7 @@ func (sr *ShelterRepoMemo) Delete(id uint64) error {
 	return nil
 }
 
-func (sr *ShelterRepoMemo) DeleteAll() error {
+func (sr *ShelterRepoMemo) DeleteAll(_ context.Context) error {
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
 

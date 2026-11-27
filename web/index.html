@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cat Shelters</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23c2410c'/%3E%3Cpath fill='%23fff' d='M9 23v-9l3-5 2 4h4l2-4 3 5v9z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Jost:wght@400;500&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script type="module" src="assets/js/app.js"></script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg class="brand__mark" viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r="22" fill="#c2410c"/>
+        <path fill="#fff" d="M12 32V19l4.5-7.5L20 17h4l3.5-5.5L32 19v13z"/>
+        <circle cx="18.5" cy="22.5" r="1.6" fill="#c2410c"/>
+        <circle cx="25.5" cy="22.5" r="1.6" fill="#c2410c"/>
+        <path fill="#c2410c" d="M20.5 26h3L22 28z"/>
+      </svg>
+      Cat Shelters
+    </a>
+    <nav class="nav__links">
+      <a href="#cats">Cats</a>
+      <a href="#shelters">Shelters</a>
+      <a href="#manage">Manage</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- Головний екран: фото та коротка статистика -->
+  <section class="hero" id="top">
+    <div class="wrap stage">
+      <dl class="facts">
+        <div><dt>Cats waiting</dt><dd id="stat-waiting">…</dd></div>
+        <div><dt>Shelters</dt><dd id="stat-shelters">…</dd></div>
+      </dl>
+      <div class="paw">
+        <img class="toe toe--1" src="assets/img/photo-f117884392-500.webp" alt="White kitten">
+        <img class="toe toe--2" src="assets/img/photo-f138888175-500.webp" alt="Cream tabby cat">
+        <img class="toe toe--3" src="assets/img/photo-f1400204-500.webp" alt="Spotted cat">
+        <img class="toe toe--4" src="assets/img/photo-f11390310-500.webp" alt="Grey tabby cat">
+        <div class="pad">
+          <h1>Adopt a cat from a local shelter</h1>
+          <p id="hero-text">Every cat here lives in a shelter and needs a home.</p>
+        </div>
+      </div>
+      <dl class="facts facts--right">
+        <div><dt>Cities</dt><dd id="stat-cities">…</dd></div>
+        <div><dt>Youngest cat</dt><dd id="stat-youngest">…</dd></div>
+      </dl>
+    </div>
+    <div class="hero__actions">
+      <a class="btn" href="#cats">Meet the cats →</a>
+    </div>
+  </section>
+
+  <!-- Коти: картка обраного кота та список усіх котів -->
+  <section id="cats">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <h2>Cats looking for a home</h2>
+          <p id="cats-caption">Pick a cat to see its age and shelter.</p>
+        </div>
+        <div class="head__actions">
+          <button class="tonal" type="button" id="show-all-cats" hidden>Show all cats</button>
+          <button class="tonal" type="button" id="add-cat">Add a cat</button>
+        </div>
+      </div>
+
+      <div class="show">
+        <div class="specs">
+          <div><span class="kicker">Age</span><span class="value" id="cat-age-text">—</span></div>
+          <div><span class="kicker">Gender</span><span class="value" id="cat-gender-text">—</span></div>
+          <div><span class="kicker">Status</span><span class="value" id="cat-status-text">—</span></div>
+          <div><span class="kicker">Shelter</span><span class="value" id="cat-shelter-text">—</span></div>
+          <div class="specs__actions">
+            <button class="tonal" type="button" id="toggle-adopted">Mark as adopted</button>
+            <button class="tonal" type="button" id="edit-cat">Edit</button>
+            <button class="tonal tonal--danger" type="button" id="delete-cat">Delete</button>
+          </div>
+        </div>
+
+        <article class="arch">
+          <p class="arch__name" id="cat-name-text">…</p>
+          <div class="arch__photo"><img id="cat-photo" src="assets/img/photo-f194866408-960.webp" alt=""></div>
+          <p class="note" id="cat-about">Loading the cats…</p>
+        </article>
+
+        <div class="side">
+          <span class="muted" id="cats-count"></span>
+          <ul class="catlist" id="cat-list"></ul>
+        </div>
+      </div>
+
+      <div class="pager">
+        <button class="tonal chip" type="button" id="prev-cat">Prev</button>
+        <span class="pager__count" id="pager-count"></span>
+        <button class="tonal chip" type="button" id="next-cat">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Притулки: картка на кожен притулок -->
+  <section id="shelters">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <h2>Shelters and their places</h2>
+          <p>Each card shows how many cats live in the shelter now.</p>
+        </div>
+        <div class="head__actions">
+          <button class="tonal" type="button" id="add-shelter">Add a shelter</button>
+        </div>
+      </div>
+      <ul class="shelters" id="shelter-list">
+        <li class="empty">Loading the shelters…</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Керування: ключ API, форми додавання/редагування, масове видалення -->
+  <section id="manage">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <h2>Manage cats and shelters</h2>
+          <p>Reading is open to everyone; adding, editing and deleting need the API key.</p>
+        </div>
+        <div class="head__actions">
+          <a class="tonal" href="/swagger/index.html">Open the API docs</a>
+        </div>
+      </div>
+
+      <div class="manage">
+        <div class="panel">
+          <h3>API key</h3>
+          <div class="field">
+            <label for="api-key">Sent in the X-API-Key header</label>
+            <input id="api-key" type="password" autocomplete="off">
+          </div>
+          <p class="status" id="status" role="status">Nothing changed yet.</p>
+          <div class="danger">
+            <button class="tonal tonal--danger" type="button" id="delete-all-cats">Delete all cats</button>
+            <button class="tonal tonal--danger" type="button" id="delete-all-shelters">Delete all shelters</button>
+          </div>
+        </div>
+
+        <form class="panel" id="cat-form">
+          <h3 id="cat-form-title">Add a cat</h3>
+          <input type="hidden" name="id">
+          <div class="field">
+            <label for="cat-name">Name</label>
+            <input id="cat-name" name="name" required maxlength="100">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="cat-age">Age in months</label>
+              <input id="cat-age" name="ageMonths" type="number" required min="0" max="360">
+            </div>
+            <div class="field">
+              <label for="cat-gender">Gender</label>
+              <select id="cat-gender" name="gender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="cat-shelter">Shelter</label>
+            <select id="cat-shelter" name="shelterID" required></select>
+          </div>
+          <label class="check"><input type="checkbox" name="adopted"> Already adopted</label>
+          <div class="form__end">
+            <button class="btn btn--small" type="submit" id="cat-submit">Add the cat</button>
+            <button class="tonal" type="reset">Clear</button>
+          </div>
+        </form>
+
+        <form class="panel" id="shelter-form">
+          <h3 id="shelter-form-title">Add a shelter</h3>
+          <input type="hidden" name="id">
+          <div class="field">
+            <label for="sh-name">Name</label>
+            <input id="sh-name" name="name" required maxlength="100">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="sh-city">City</label>
+              <input id="sh-city" name="city" required maxlength="100">
+            </div>
+            <div class="field">
+              <label for="sh-capacity">Places</label>
+              <input id="sh-capacity" name="capacity" type="number" required min="1">
+            </div>
+          </div>
+          <div class="field">
+            <label for="sh-address">Address</label>
+            <input id="sh-address" name="address" required maxlength="200">
+          </div>
+          <div class="form__end">
+            <button class="btn btn--small" type="submit" id="shelter-submit">Add the shelter</button>
+            <button class="tonal" type="reset">Clear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Шаблони, які JavaScript копіює для кожного кота й притулку -->
+<template id="cat-item-template">
+  <li>
+    <button type="button">
+      <img alt="" width="48" height="48">
+      <span><b class="cat-item__name"></b><small class="cat-item__info"></small></span>
+    </button>
+  </li>
+</template>
+
+<template id="shelter-template">
+  <li class="shelter">
+    <div class="shelter__photo"><img alt="" loading="lazy"></div>
+    <h3 class="shelter__name"></h3>
+    <p class="shelter__where"></p>
+    <div class="meter">
+      <div class="meter__row"><span class="meter__cats"></span><span class="meter__places"></span></div>
+      <div class="meter__bar"><span></span></div>
+    </div>
+    <div class="shelter__actions">
+      <button class="btn btn--small" type="button" data-action="show-cats">See its cats →</button>
+      <button class="tonal" type="button" data-action="edit">Edit</button>
+      <button class="tonal tonal--danger" type="button" data-action="delete">Delete</button>
+    </div>
+  </li>
+</template>
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -21,7 +22,7 @@ func NewCatRepoMemory() *CatRepoMemo {
 	}
 }
 
-func (cr *CatRepoMemo) GetAll() ([]models.Cat, error) {
+func (cr *CatRepoMemo) GetAll(_ context.Context) ([]models.Cat, error) {
 	cr.mu.RLock()
 	defer cr.mu.RUnlock()
 
@@ -34,7 +35,7 @@ func (cr *CatRepoMemo) GetAll() ([]models.Cat, error) {
 	return cats, nil
 }
 
-func (cr *CatRepoMemo) GetByID(id uint64) (models.Cat, error) {
+func (cr *CatRepoMemo) GetByID(_ context.Context, id uint64) (models.Cat, error) {
 	cr.mu.RLock()
 	defer cr.mu.RUnlock()
 
@@ -46,7 +47,7 @@ func (cr *CatRepoMemo) GetByID(id uint64) (models.Cat, error) {
 	return cat, nil
 }
 
-func (cr *CatRepoMemo) GetCatsByShelterID(id uint64) ([]models.Cat, error) {
+func (cr *CatRepoMemo) GetCatsByShelterID(_ context.Context, id uint64) ([]models.Cat, error) {
 	cr.mu.RLock()
 	defer cr.mu.RUnlock()
 
@@ -61,7 +62,7 @@ func (cr *CatRepoMemo) GetCatsByShelterID(id uint64) ([]models.Cat, error) {
 	return cats, nil
 }
 
-func (cr *CatRepoMemo) Create(cat models.Cat) (models.Cat, error) {
+func (cr *CatRepoMemo) Create(_ context.Context, cat models.Cat) (models.Cat, error) {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
 
@@ -73,7 +74,7 @@ func (cr *CatRepoMemo) Create(cat models.Cat) (models.Cat, error) {
 	return cat, nil
 }
 
-func (cr *CatRepoMemo) Update(id uint64, cat models.Cat) error {
+func (cr *CatRepoMemo) Update(_ context.Context, id uint64, cat models.Cat) error {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
 
@@ -87,7 +88,7 @@ func (cr *CatRepoMemo) Update(id uint64, cat models.Cat) error {
 	return nil
 }
 
-func (cr *CatRepoMemo) Delete(id uint64) error {
+func (cr *CatRepoMemo) Delete(_ context.Context, id uint64) error {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
 
@@ -100,7 +101,7 @@ func (cr *CatRepoMemo) Delete(id uint64) error {
 	return nil
 }
 
-func (cr *CatRepoMemo) DeleteAll() error {
+func (cr *CatRepoMemo) DeleteAll(_ context.Context) error {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
 
